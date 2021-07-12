@@ -13,16 +13,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import com.example.hearmeout.R
 import com.example.hearmeout.databinding.FragmentPlaylistBinding
 import com.example.hearmeout.playback.MediaControllerCallbacks
 import com.example.hearmeout.playback.MediaPlaybackService
+import com.example.hearmeout.viewmodel.PlaylistViewModel
 
 class PlaylistFragment : Fragment() {
 
     private lateinit var mediaBrowser: MediaBrowserCompat
     private lateinit var binding : FragmentPlaylistBinding
     private lateinit var controllerCallbacks : MediaControllerCallbacks
+    private val playlistViewModel : PlaylistViewModel by viewModels()
 
     private val connCallback = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
@@ -52,6 +55,7 @@ class PlaylistFragment : Fragment() {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false)
         binding.lifecycleOwner = this
+        binding.
         controllerCallbacks = MediaControllerCallbacks(binding)
 
         return binding.root
@@ -68,6 +72,14 @@ class PlaylistFragment : Fragment() {
         MediaControllerCompat.getMediaController(this.requireActivity())?.unregisterCallback(controllerCallbacks)
     }
 
+    private fun buildUI() {
+        Log.i("Aarathi", "buildUI called")
+        MediaControllerCompat.getMediaController(this.requireActivity()).registerCallback(controllerCallbacks)
+        binding.playPause.setOnClickListener {
+            playAudio()
+        }
+    }
+
     fun playAudio() {
         Log.i("Aarathi", "Play button clicked")
         if (mediaBrowser.isConnected) {
@@ -82,11 +94,4 @@ class PlaylistFragment : Fragment() {
         }
     }
 
-    private fun buildUI() {
-        Log.i("Aarathi", "buildUI called")
-        MediaControllerCompat.getMediaController(this.requireActivity()).registerCallback(controllerCallbacks)
-        binding.playPause.setOnClickListener {
-            playAudio()
-        }
-    }
 }
