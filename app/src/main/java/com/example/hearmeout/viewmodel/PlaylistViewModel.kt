@@ -1,11 +1,14 @@
 package com.example.hearmeout.viewmodel
 
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.hearmeout.data.SongProvider
 
 class PlaylistViewModel : ViewModel() {
 
+    private val songProvider = SongProvider()
+
+    fun fetchSongs() {
+        songProvider.fetchSongsFromNetwork()
+    }
 
 }

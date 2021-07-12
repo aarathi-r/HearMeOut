@@ -1,10 +1,8 @@
 package com.example.hearmeout.ui
 
 import android.content.ComponentName
-import android.media.MediaMetadata
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -15,10 +13,14 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import com.example.hearmeout.R
+import com.example.hearmeout.data.Music
 import com.example.hearmeout.databinding.FragmentPlaylistBinding
 import com.example.hearmeout.playback.MediaControllerCallbacks
 import com.example.hearmeout.playback.MediaPlaybackService
 import com.example.hearmeout.viewmodel.PlaylistViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class PlaylistFragment : Fragment() {
 
@@ -55,7 +57,7 @@ class PlaylistFragment : Fragment() {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false)
         binding.lifecycleOwner = this
-        binding.
+        binding.playlistViewModel = playlistViewModel
         controllerCallbacks = MediaControllerCallbacks(binding)
 
         return binding.root
@@ -78,6 +80,7 @@ class PlaylistFragment : Fragment() {
         binding.playPause.setOnClickListener {
             playAudio()
         }
+
     }
 
     fun playAudio() {

@@ -5,8 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
-            name="playlistFragment"
-            type="com.example.hearmeout.ui.PlaylistFragment" />
+            name="playlistViewModel"
+            type="com.example.hearmeout.viewmodel.PlaylistViewModel" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
