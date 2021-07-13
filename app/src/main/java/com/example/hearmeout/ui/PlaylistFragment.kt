@@ -13,27 +13,35 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import com.example.hearmeout.R
-import com.example.hearmeout.data.Music
+import com.example.hearmeout.data.Song
 import com.example.hearmeout.databinding.FragmentPlaylistBinding
 import com.example.hearmeout.playback.MediaControllerCallbacks
 import com.example.hearmeout.playback.MediaPlaybackService
+import com.example.hearmeout.ui.adapters.PlaylistAdapter
 import com.example.hearmeout.viewmodel.PlaylistViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class PlaylistFragment : Fragment() {
 
     private lateinit var mediaBrowser: MediaBrowserCompat
-    private lateinit var binding : FragmentPlaylistBinding
-    private lateinit var controllerCallbacks : MediaControllerCallbacks
-    private val playlistViewModel : PlaylistViewModel by viewModels()
+    private lateinit var binding: FragmentPlaylistBinding
+    private lateinit var controllerCallbacks: MediaControllerCallbacks
+    private val playlistAdapter: PlaylistAdapter by lazy {
+        PlaylistAdapter(this)
+    }
+
+    private val playlistViewModel: PlaylistViewModel by viewModels()
 
     private val connCallback = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
-            Log.i("Aarathi","MediaBrowser connected to the service")
-            val mediaController = MediaControllerCompat(this@PlaylistFragment.requireActivity(), mediaBrowser.sessionToken)
-            MediaControllerCompat.setMediaController(this@PlaylistFragment.requireActivity(), mediaController)
+            Log.i("Aarathi", "MediaBrowser connected to the service")
+            val mediaController = MediaControllerCompat(
+                this@PlaylistFragment.requireActivity(),
+                mediaBrowser.sessionToken
+            )
+            MediaControllerCompat.setMediaController(
+                this@PlaylistFragment.requireActivity(),
+                mediaController
+            )
             buildUI()
         }
 
@@ -50,14 +58,21 @@ class PlaylistFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        mediaBrowser = MediaBrowserCompat(activity,
+        mediaBrowser = MediaBrowserCompat(
+            activity,
             ComponentName(this.requireActivity(), MediaPlaybackService::class.java),
             connCallback,
-            null)
+            null
+        )
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false)
         binding.lifecycleOwner = this
-        binding.playlistViewModel = playlistViewModel
+
+        binding.playList.adapter = playlistAdapter
+        playlistViewModel.songs.observe(viewLifecycleOwner, {
+            playlistAdapter.updateList(it)
+        })
+
         controllerCallbacks = MediaControllerCallbacks(binding)
 
         return binding.root
@@ -71,28 +86,32 @@ class PlaylistFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         mediaBrowser.disconnect()
-        MediaControllerCompat.getMediaController(this.requireActivity())?.unregisterCallback(controllerCallbacks)
+        MediaControllerCompat.getMediaController(this.requireActivity())
+            ?.unregisterCallback(controllerCallbacks)
     }
 
     private fun buildUI() {
         Log.i("Aarathi", "buildUI called")
-        MediaControllerCompat.getMediaController(this.requireActivity()).registerCallback(controllerCallbacks)
-        binding.playPause.setOnClickListener {
-            playAudio()
-        }
-
+        MediaControllerCompat.getMediaController(this.requireActivity())
+            .registerCallback(controllerCallbacks)
     }
 
-    fun playAudio() {
+    fun playAudio(song : Song) {
         Log.i("Aarathi", "Play button clicked")
         if (mediaBrowser.isConnected) {
             val mediaController = MediaControllerCompat.getMediaController(this.requireActivity())
             val playbackState = mediaController.playbackState.state
             Log.i("Aarathi", "Playback state - $playbackState")
-            when(playbackState) {
+//            when (playbackState) {
+//                PlaybackStateCompat.STATE_PLAYING -> mediaController.transportControls.pause()
+//                PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_NONE -> mediaController.transportControls.play()
+//                else -> Log.i("Aarathi", "Not handled - state: $playbackState")
+//            }
+
+            when (playbackState) {
                 PlaybackStateCompat.STATE_PLAYING -> mediaController.transportControls.pause()
-                PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_NONE -> mediaController.transportControls.play()
-                else -> Log.i("Aarathi","Not handled - state: $playbackState")
+                PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_NONE -> mediaController.transportControls.playFromMediaId(song.source, null)
+                else -> Log.i("Aarathi", "Not handled - state: $playbackState")
             }
         }
     }

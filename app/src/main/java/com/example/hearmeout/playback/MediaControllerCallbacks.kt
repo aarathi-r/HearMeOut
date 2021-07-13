@@ -22,15 +22,15 @@ class MediaControllerCallbacks(private val binding : FragmentPlaylistBinding) : 
 
     override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
         Log.i("Aarathi","Playback state is changed to ${state?.state}")
-        when(state?.state) {
-            PlaybackStateCompat.STATE_PLAYING ->  binding.playPause.setImageResource(R.drawable.pause_icon)
-            PlaybackStateCompat.STATE_PAUSED -> binding.playPause.setImageResource(R.drawable.play_icon)
-        }
+//        when(state?.state) {
+//            PlaybackStateCompat.STATE_PLAYING ->  binding.playPause.setImageResource(R.drawable.pause_icon)
+//            PlaybackStateCompat.STATE_PAUSED -> binding.playPause.setImageResource(R.drawable.play_icon)
+//        }
     }
 
     override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
         Log.i("Aarathi","Metadata is changed")
-        binding.mediaData.text = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: "No Title"
+        //binding.mediaData.text = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: "No Title"
     }
 
     override fun onAudioInfoChanged(info: MediaControllerCompat.PlaybackInfo?) {

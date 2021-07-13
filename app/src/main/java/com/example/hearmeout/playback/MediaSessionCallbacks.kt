@@ -3,6 +3,7 @@ package com.example.hearmeout.playback
 import android.content.Context
 import android.content.Intent
 import android.media.*
+import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -18,7 +19,34 @@ class MediaSessionCallbacks(private val service : MediaPlaybackService) : MediaS
     private lateinit var audioFocusRequest: AudioFocusRequest
 
     private fun initPlayer() : MediaPlayer {
-        return MediaPlayer.create(service, R.raw.rozana)
+        return MediaPlayer()
+    }
+
+    private fun startPlayer() {
+        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+            setOnAudioFocusChangeListener { focus ->
+                when(focus) {
+                    AudioManager.AUDIOFOCUS_GAIN -> Log.i("Aarathi","Audio in focus currently")
+                    AudioManager.AUDIOFOCUS_LOSS -> Log.i("Aarathi","Audio not in focus anymore")
+                    else -> Log.i("Aarathi","The audio focus state is : $focus" )
+                }
+            }
+            setAudioAttributes(AudioAttributes.Builder().run {
+                setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                build() })
+            build()
+        }
+
+        val audioFocus = audioManager.requestAudioFocus(audioFocusRequest)
+        if (audioFocus == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            service.startService(Intent(service.applicationContext, MediaPlaybackService::class.java))
+            service.getMediaSession()?.apply {
+                isActive = true
+                setPlaybackState(getPlaybackState(PlaybackStateCompat.STATE_PLAYING))
+                //setMetadata(getMetadata())
+            }
+            mediaPlayer.start()
+        }
     }
 
     override fun onPlay() {
@@ -48,6 +76,17 @@ class MediaSessionCallbacks(private val service : MediaPlaybackService) : MediaS
             mediaPlayer.start()
         }
 
+    }
+
+    override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
+        super.onPlayFromMediaId(mediaId, extras)
+        Log.i("Aarathi","PlayFromMediaId button is pressed\nmediaId = $mediaId")
+        mediaPlayer.apply {
+            reset()
+            setDataSource(mediaId)
+            prepare()
+        }
+        startPlayer()
     }
 
     override fun onPause() {
