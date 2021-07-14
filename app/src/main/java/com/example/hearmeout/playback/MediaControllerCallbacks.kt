@@ -1,12 +1,10 @@
 package com.example.hearmeout.playback
 
-import android.media.MediaMetadata
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import com.example.hearmeout.R
 import com.example.hearmeout.databinding.FragmentPlaylistBinding
 
 class MediaControllerCallbacks(private val binding : FragmentPlaylistBinding) : MediaControllerCompat.Callback() {

@@ -43,7 +43,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
         if (EMPTY_MEDIA_ROOT_ID == parentId) {
-            result.sendResult(mutableListOf<MediaBrowserCompat.MediaItem>())
+            result.sendResult(mutableListOf())
         }
     }
 

@@ -10,14 +10,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import retrofit2.await
 
 class PlaylistViewModel : ViewModel() {
 
     private val songProvider = SongProvider()
     private val coroutineJob = Job()
     private val coroutineScope = CoroutineScope(coroutineJob + Dispatchers.Main)
-    private var _songs = MutableLiveData<List<Song>>()
+    private var _songs = MutableLiveData(listOf<Song>())
     val songs: LiveData<List<Song>>
         get() = _songs
 

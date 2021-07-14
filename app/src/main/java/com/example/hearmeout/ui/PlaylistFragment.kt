@@ -67,12 +67,8 @@ class PlaylistFragment : Fragment() {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false)
         binding.lifecycleOwner = this
-
+        binding.viewModel = playlistViewModel
         binding.playList.adapter = playlistAdapter
-        playlistViewModel.songs.observe(viewLifecycleOwner, {
-            playlistAdapter.updateList(it)
-        })
-
         controllerCallbacks = MediaControllerCallbacks(binding)
 
         return binding.root

@@ -1,21 +1,20 @@
 package com.example.hearmeout.ui.adapters
 
-import android.content.Context
-import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hearmeout.R
 import com.example.hearmeout.data.Song
+import com.example.hearmeout.databinding.SongDetailsViewBinding
 import com.example.hearmeout.ui.PlaylistFragment
 
 class PlaylistAdapter(val playlistFragment : PlaylistFragment) : RecyclerView.Adapter<PlaylistAdapter.SongDetailsView>() {
 
     private var songs = listOf<Song>()
+
+    private lateinit var binding : SongDetailsViewBinding
 
     fun updateList(playlist : List<Song>) {
         songs = playlist
@@ -23,29 +22,32 @@ class PlaylistAdapter(val playlistFragment : PlaylistFragment) : RecyclerView.Ad
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongDetailsView {
-        //val view = View.inflate(context, R.layout.song_details_view, parent, false)
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.song_details_view, parent, false)
-        return SongDetailsView(view)
+        binding = DataBindingUtil.inflate(
+            LayoutInflater.from(parent.context),
+            R.layout.song_details_view, parent, false)
+        return SongDetailsView(binding)
     }
 
     override fun onBindViewHolder(holder: SongDetailsView, position: Int) {
-        with (songs[position]) {
-            Log.i("Aarathi", "title: $title\nimageUrl: $image")
-            holder.title.text = title
-            holder.art.setImageURI(Uri.parse(image))
-        }
+        holder.bind(songs[position])
     }
 
     override fun getItemCount(): Int {
         return songs.size
     }
 
-    inner class SongDetailsView(view : View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.title)
-        val art: ImageView = view.findViewById(R.id.art)
+    inner class SongDetailsView(binding : SongDetailsViewBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
-            view.setOnClickListener {
+            itemView.setOnClickListener {
                 playlistFragment.playAudio(songs[bindingAdapterPosition])
+            }
+        }
+
+        fun bind(song : Song) {
+            with (song) {
+                Log.i("Aarathi", "title: $title\nimageUrl: $image")
+                binding.song = song
+                binding.executePendingBindings()
             }
         }
     }
