@@ -1,42 +1,28 @@
 package com.example.hearmeout.viewmodel
 
+import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.hearmeout.data.Song
-import com.example.hearmeout.data.SongProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 class PlaylistViewModel : ViewModel() {
 
-    private val songProvider = SongProvider()
-    private val coroutineJob = Job()
-    private val coroutineScope = CoroutineScope(coroutineJob + Dispatchers.Main)
     private var _songs = MutableLiveData(listOf<Song>())
     val songs: LiveData<List<Song>>
         get() = _songs
 
-    init {
-        fetchSongs()
+    fun refreshSongs(media : List<Song>) {
+        Log.i("Aarathi", "refreshSongs - ${media.size}")
+        _songs.value = media
     }
 
-    private fun fetchSongs() {
-        Log.i("Aarathi", "Fetch the Songs")
-        coroutineScope.launch {
-            try {
-                _songs.value = songProvider.fetchSongs()
-            } catch (t : Throwable) {
+    private var _mediaItems = MutableLiveData(listOf<MediaBrowserCompat.MediaItem>())
+    val mediaItems : LiveData<List<MediaBrowserCompat.MediaItem>>
+        get() = _mediaItems
 
-            }
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        coroutineJob.cancel()
+    fun refreshMediaItems(media : List<MediaBrowserCompat.MediaItem>) {
+        _mediaItems.value = media
     }
 }

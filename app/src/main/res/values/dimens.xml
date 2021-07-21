@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="song_playlist_item_margin">4dp</dimen>
+    <dimen name="song_playlist_item_padding">2dp</dimen>
+    <dimen name="song_playlist_item_strokeWidth">1dp</dimen>
+</resources>

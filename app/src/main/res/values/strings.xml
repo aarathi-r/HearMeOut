@@ -2,4 +2,5 @@
     <string name="app_name">HearMeOut</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="song_art">Song related art-media</string>
+    <string name="song_play_state">Song\'s playing state</string>
 </resources>

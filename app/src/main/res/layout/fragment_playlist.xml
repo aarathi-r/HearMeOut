@@ -19,12 +19,16 @@
             android:id="@+id/play_list"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@color/black"
+            android:backgroundTint="@color/grey"
+            android:backgroundTintMode="src_in"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:listData="@{viewModel.songs}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:listData="@{viewModel.mediaItems}"
+            tools:listitem="@layout/media_details_view" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
