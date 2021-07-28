@@ -8,7 +8,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
-import com.example.hearmeout.data.Song
 import com.example.hearmeout.data.SongProvider
 import com.example.hearmeout.util.CATEGORY_ALBUM
 import com.example.hearmeout.util.CATEGORY_ARTIST
@@ -29,24 +28,24 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private lateinit var playbackStateBuilder : PlaybackStateCompat.Builder
     private lateinit var mediaMetadataBuilder : MediaMetadataCompat.Builder
 
-    private lateinit var songs : List<Song>
+    private lateinit var songs : List<MediaMetadataCompat>
 
     private val coroutineJob = Job()
     private val coroutineScope = CoroutineScope(coroutineJob + Dispatchers.Main)
 
-    private val songProvider : SongProvider by lazy {
-        SongProvider()
-    }
+    private lateinit var sessionCallbacks : MediaSessionCallbacks
 
     override fun onCreate() {
         super.onCreate()
-        Log.i("Aarathi", "onCreate - MediaPlaybackService")
+        Log.i("Aarathi", "MediaPlaybackService - onCreate")
         playbackStateBuilder = PlaybackStateCompat.Builder()
             .setActions(PlaybackStateCompat.ACTION_PLAY
                     or PlaybackStateCompat.ACTION_PLAY_PAUSE)
 
+        sessionCallbacks = MediaSessionCallbacks(this)
+
         mediaSession = MediaSessionCompat(baseContext, LOG_TAG).apply {
-            setCallback(MediaSessionCallbacks(this@MediaPlaybackService))
+            setCallback(sessionCallbacks)
             setPlaybackState(playbackStateBuilder.build())
             setSessionToken(sessionToken)
         }
@@ -58,19 +57,21 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         clientPackageName: String,
         clientUid: Int,
         rootHints: Bundle?
-    ): BrowserRoot? {
-        Log.i("Aarathi", "My UID : ${android.os.Process.myUid()}")
-        Log.i("Aarathi", "My process-name: ${Application.getProcessName()}")
-
-        return BrowserRoot(MEDIA_ROOT_ID, null)
-        //return BrowserRoot(EMPTY_MEDIA_ROOT_ID, null)
+    ): BrowserRoot {
+        return if(clientUid == android.os.Process.myUid()
+            && clientPackageName == Application.getProcessName())
+        {
+            BrowserRoot(MEDIA_ROOT_ID, null)
+        } else {
+            BrowserRoot(EMPTY_MEDIA_ROOT_ID, null)
+        }
     }
 
     override fun onLoadChildren(
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        var mediaItems : MutableList<MediaBrowserCompat.MediaItem>?
+        var mediaItems : MutableList<MediaBrowserCompat.MediaItem>
         when(parentId) {
             EMPTY_MEDIA_ROOT_ID -> {
                 result.sendResult(mutableListOf())
@@ -79,11 +80,23 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 result.detach()
                 coroutineScope.launch {
                     mediaItems = getSongsForDisplay(parentId)
+                    //TODO temporary - need to change to some other place
+                    sessionCallbacks.initMediaList(mediaItems)
+//                    val queue = withContext(Dispatchers.Default) {
+//                        getQueueItem(mediaItems)
+//                    }
+//                    mediaSession?.setQueue(queue)
                     result.sendResult(mediaItems)
                 }
             }
         }
 
+    }
+
+    override fun onLoadItem(itemId: String, result: Result<MediaBrowserCompat.MediaItem>) {
+        val metadata = SongProvider.getMetadataForMediaId(itemId)
+        val mediaItem = metadata?.let { getAllMediaItems(listOf(it))}
+        return result.sendResult(mediaItem?.get(0))
     }
 
     fun getMediaSession() : MediaSessionCompat? {
@@ -100,7 +113,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         Log.i("Aarathi", "Fetch the Songs")
         coroutineScope.launch {
             try {
-                songs = songProvider.fetchSongs()
+                songs = SongProvider.fetchSongs()
                 Log.i("Aarathi", "Songs : ${songs.size}")
             } catch (t : Throwable) {
 

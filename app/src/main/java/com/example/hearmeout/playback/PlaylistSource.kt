@@ -4,51 +4,38 @@ import android.media.MediaMetadata
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.net.toUri
-import com.example.hearmeout.data.Song
 import com.example.hearmeout.util.CATEGORY_ALBUM
 import com.example.hearmeout.util.CATEGORY_ARTIST
 import com.example.hearmeout.util.CATEGORY_GENRE
 
-fun getAllMediaItems(songs : List<Song>) : MutableList<MediaBrowserCompat.MediaItem> {
+fun getAllMediaItems(mediaList : List<MediaMetadataCompat>) : MutableList<MediaBrowserCompat.MediaItem> {
     val mediaItems = mutableListOf<MediaBrowserCompat.MediaItem>()
-    songs.forEach { song ->
-        val mediaMetadata = MediaMetadataCompat.Builder().run {
-            putString(MediaMetadata.METADATA_KEY_MEDIA_ID, song.source.hashCode().toString())
-            putString(MediaMetadata.METADATA_KEY_TITLE, song.title)
-            putString(MediaMetadata.METADATA_KEY_ALBUM, song.album)
-            putString(MediaMetadata.METADATA_KEY_ARTIST, song.artist)
-            putString(MediaMetadata.METADATA_KEY_GENRE, song.genre)
-            putString(MediaMetadata.METADATA_KEY_MEDIA_URI, song.source)
-            putString(MediaMetadata.METADATA_KEY_ART_URI, song.image)
-            putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, song.trackNumber)
-            putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, song.trackCount)
-            putLong(MediaMetadata.METADATA_KEY_DURATION, song.duration)
-            build()
-        }
+    mediaList.forEach { metadata ->
         mediaItems.add(MediaBrowserCompat.MediaItem(
-            mediaMetadata.description,
+            metadata.description,
             MediaBrowserCompat.MediaItem.FLAG_PLAYABLE))
     }
     return mediaItems
 }
 
-fun getCategoryMediaItems(allSongs : List<Song>, category : String) : MutableList<MediaBrowserCompat.MediaItem> {
+fun getCategoryMediaItems(allMedia : List<MediaMetadataCompat>, category : String) : MutableList<MediaBrowserCompat.MediaItem> {
     val songsByCategory = when(category) {
-        CATEGORY_ALBUM -> getSongsByCategory(allSongs, CATEGORY_ALBUM)
-        CATEGORY_ARTIST -> getSongsByCategory(allSongs, CATEGORY_ARTIST)
-        CATEGORY_GENRE -> getSongsByCategory(allSongs, CATEGORY_GENRE)
+        CATEGORY_ALBUM -> getSongsByCategory(allMedia, MediaMetadata.METADATA_KEY_ALBUM)
+        CATEGORY_ARTIST -> getSongsByCategory(allMedia, MediaMetadata.METADATA_KEY_ARTIST)
+        CATEGORY_GENRE -> getSongsByCategory(allMedia, MediaMetadata.METADATA_KEY_GENRE)
         else -> emptyMap()
     }
     val mediaItems = mutableListOf<MediaBrowserCompat.MediaItem>()
     songsByCategory.forEach { entry ->
         val key = entry.key
-        val songs = entry.value
+        val mediaList = entry.value
         val mediaDescription = MediaDescriptionCompat.Builder().run {
             setMediaId(key.hashCode().toString())
             setTitle(key)
-            setSubtitle("${songs.size} Songs")
-            setIconUri(songs[0].image.toUri())
+            setSubtitle("${mediaList.size} Songs")
+            setIconUri(mediaList[0].getString(MediaMetadata.METADATA_KEY_ART_URI).toUri())
             build()
         }
         mediaItems.add(MediaBrowserCompat.MediaItem(mediaDescription, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE))
@@ -56,17 +43,24 @@ fun getCategoryMediaItems(allSongs : List<Song>, category : String) : MutableLis
     return mediaItems
 }
 
-private fun getSongsByCategory(allSongs : List<Song>, category : String) : HashMap<String, MutableList<Song>> {
-    val songsByCategory = HashMap<String, MutableList<Song>>()
-    allSongs.forEach {
-        val categoryValue = when(category) {
-            CATEGORY_ALBUM -> it.album
-            CATEGORY_ARTIST -> it.artist
-            CATEGORY_GENRE -> it.genre
-            else -> it.artist
-        }
+private fun getSongsByCategory(allMedia : List<MediaMetadataCompat>, categoryKey : String) : HashMap<String, MutableList<MediaMetadataCompat>> {
+    val songsByCategory = HashMap<String, MutableList<MediaMetadataCompat>>()
+    allMedia.forEach {
+        val categoryValue = it.getString(categoryKey)
         val songs = songsByCategory[categoryValue]?.apply { add(it) } ?: mutableListOf(it)
         songsByCategory[categoryValue] = songs
     }
     return songsByCategory
+}
+
+fun getQueueItem(mediaItems : List<MediaBrowserCompat.MediaItem>) : List<MediaSessionCompat.QueueItem> {
+    val queue = mutableListOf<MediaSessionCompat.QueueItem>()
+    mediaItems.forEach {
+        it.description.mediaId?.let { id  ->
+            MediaSessionCompat.QueueItem(it.description, id.toLong())
+        }?.let { queueItem ->
+            queue.add(queueItem)
+        }
+    }
+    return queue
 }

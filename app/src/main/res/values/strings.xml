@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">HearMeOut</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="song_art">Song related art-media</string>
-    <string name="song_play_state">Song\'s playing state</string>
+    <string name="song_art">Displays song related art-media</string>
+    <string name="song_play_state">Represents song\'s playing state</string>
+    <string name="song_previous">Navigates to previous song in the queue</string>
+    <string name="song_next">Navigates to next song in the queue</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

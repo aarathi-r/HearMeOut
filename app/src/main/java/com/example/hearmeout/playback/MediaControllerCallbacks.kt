@@ -3,11 +3,13 @@ package com.example.hearmeout.playback
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import com.example.hearmeout.databinding.FragmentPlaylistBinding
+import com.example.hearmeout.R
+import com.example.hearmeout.databinding.FragmentNowPlayingBinding
 
-class MediaControllerCallbacks(private val binding : FragmentPlaylistBinding) : MediaControllerCompat.Callback() {
+class MediaControllerCallbacks(private val binding : FragmentNowPlayingBinding) : MediaControllerCompat.Callback() {
 
     override fun onSessionReady() {
     }
@@ -18,12 +20,12 @@ class MediaControllerCallbacks(private val binding : FragmentPlaylistBinding) : 
     override fun onSessionEvent(event: String?, extras: Bundle?) {
     }
 
-    override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-        Log.i("Aarathi","Playback state is changed to ${state?.state}")
-//        when(state?.state) {
-//            PlaybackStateCompat.STATE_PLAYING ->  binding.playPause.setImageResource(R.drawable.pause_icon)
-//            PlaybackStateCompat.STATE_PAUSED -> binding.playPause.setImageResource(R.drawable.play_icon)
-//        }
+    override fun onPlaybackStateChanged(playbackState: PlaybackStateCompat?) {
+        when(playbackState?.state) {
+            PlaybackStateCompat.STATE_PLAYING ->  binding.playCurrent.setImageResource(R.drawable.pause_icon)
+            PlaybackStateCompat.STATE_PAUSED -> binding.playCurrent.setImageResource(R.drawable.play_icon)
+            else -> Log.i("Aarathi", "Playback state ${playbackState?.state} not handled")
+        }
     }
 
     override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
@@ -33,4 +35,10 @@ class MediaControllerCallbacks(private val binding : FragmentPlaylistBinding) : 
 
     override fun onAudioInfoChanged(info: MediaControllerCompat.PlaybackInfo?) {
     }
+
+    override fun onQueueChanged(queue: MutableList<MediaSessionCompat.QueueItem>?) {
+        super.onQueueChanged(queue)
+    }
+
+
 }

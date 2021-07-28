@@ -1,7 +1,6 @@
 package com.example.hearmeout.ui.adapters
 
 import android.support.v4.media.MediaBrowserCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -34,7 +33,6 @@ class PlaylistAdapter(private val clickListener: MediaClickListener)
         }
 
         fun bind(media : MediaBrowserCompat.MediaItem, clickHandler : MediaClickListener) {
-            Log.i("Aarathi", "title: ${media.description.title}\nimageUrl: ${media.description.iconUri}")
             with (binding) {
                 mediaItem = media
                 clickListener = clickHandler

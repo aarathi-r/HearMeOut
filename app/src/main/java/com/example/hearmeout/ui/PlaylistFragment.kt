@@ -1,6 +1,5 @@
 package com.example.hearmeout.ui
 
-import android.content.ComponentName
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -11,22 +10,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.hearmeout.R
 import com.example.hearmeout.databinding.FragmentPlaylistBinding
-import com.example.hearmeout.playback.MediaControllerCallbacks
-import com.example.hearmeout.playback.MediaPlaybackService
 import com.example.hearmeout.ui.adapters.PlaylistAdapter
 import com.example.hearmeout.ui.adapters.MediaClickListener
 import com.example.hearmeout.viewmodel.PlaylistViewModel
 
 class PlaylistFragment : Fragment() {
 
-    private lateinit var mediaBrowser: MediaBrowserCompat
-    private lateinit var binding: FragmentPlaylistBinding
-    private lateinit var controllerCallbacks: MediaControllerCallbacks
+    private lateinit var binding : FragmentPlaylistBinding
+
+    private lateinit var mediaBrowser : MediaBrowserCompat
     private var mediaRoot : String? = null
 
-    private val playlistAdapter: PlaylistAdapter by lazy {
+    private val playlistAdapter : PlaylistAdapter by lazy {
         PlaylistAdapter(MediaClickListener { media ->
             if (media.isPlayable)
                 play(media)
@@ -35,7 +34,7 @@ class PlaylistFragment : Fragment() {
         })
     }
 
-    private val playlistViewModel: PlaylistViewModel by viewModels()
+    private val playlistViewModel : PlaylistViewModel by viewModels()
 
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(
@@ -50,79 +49,54 @@ class PlaylistFragment : Fragment() {
         }
     }
 
-    private val connCallback = object : MediaBrowserCompat.ConnectionCallback() {
-        override fun onConnected() {
-            Log.i("Aarathi", "MediaBrowser connected to the service")
-            val mediaController = MediaControllerCompat(
-                this@PlaylistFragment.requireActivity(),
-                mediaBrowser.sessionToken)
-
-            MediaControllerCompat.setMediaController(
-                this@PlaylistFragment.requireActivity(),
-                mediaController)
-
-            mediaRoot = mediaBrowser.root
-            mediaRoot?.let {
-                mediaBrowser.subscribe(it, subscriptionCallback)
-            }
-            buildUI()
-        }
-
-        override fun onConnectionSuspended() {
-            super.onConnectionSuspended()
-        }
-
-        override fun onConnectionFailed() {
-            super.onConnectionFailed()
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.i("Aarathi", "PlaylistFragment - onCreate")
+        val args : PlaylistFragmentArgs by navArgs()
+        this.mediaRoot = args.mediaRoot
+        this.mediaBrowser = (requireActivity() as MainActivity).getMediaBrowser()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.i("Aarathi", "onCreateView - PlaylistFragment")
-        mediaBrowser = MediaBrowserCompat(
-            activity,
-            ComponentName(this.requireActivity(), MediaPlaybackService::class.java),
-            connCallback,
-            null
-        )
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false)
         binding.lifecycleOwner = this
         binding.viewModel = playlistViewModel
         binding.playList.adapter = playlistAdapter
-        controllerCallbacks = MediaControllerCallbacks(binding)
-
         return binding.root
     }
 
     override fun onStart() {
         super.onStart()
-        mediaBrowser.connect()
+        Log.i("Aarathi", "PlaylistFragment - onStart")
+        if (mediaBrowser.isConnected) {
+            Log.i("Aarathi", "PlaylistFragment - MediaBrowser connected")
+            onServiceConnected()
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        mediaBrowser.disconnect()
-        MediaControllerCompat.getMediaController(this.requireActivity())
-            ?.unregisterCallback(controllerCallbacks)
         mediaRoot?.let {
             mediaBrowser.unsubscribe(it, subscriptionCallback)
         }
     }
 
-    private fun buildUI() {
-        Log.i("Aarathi", "buildUI called")
-        MediaControllerCompat.getMediaController(this.requireActivity())
-            .registerCallback(controllerCallbacks)
+    private fun onServiceConnected() {
+        mediaRoot?.let {
+            Log.i("Aarathi", "Subscribe for MediaItems")
+            mediaBrowser.subscribe(it, subscriptionCallback)
+        }
+
     }
 
     private fun play(mediaItem : MediaBrowserCompat.MediaItem) {
         Log.i("Aarathi", "Play button clicked")
-        if (mediaBrowser.isConnected) {
-            handlePlayPause(MediaControllerCompat.getMediaController(this.requireActivity()), mediaItem)
+        mediaItem.mediaId?.let {
+            findNavController().navigate(PlaylistFragmentDirections.actionPlaylistFragmentToNowPlayingFragment(it))
         }
     }
 

@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/players_navigation_graph"
     app:startDestination="@id/playlistFragment">
 
     <fragment
         android:id="@+id/playlistFragment"
         android:name="com.example.hearmeout.ui.PlaylistFragment"
-        android:label="PlaylistFragment" />
+        android:label="PlaylistFragment" >
+        <action
+            android:id="@+id/action_playlistFragment_to_nowPlayingFragment"
+            app:destination="@id/nowPlayingFragment" />
+        <argument
+            android:name="mediaRoot"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/nowPlayingFragment"
+        android:name="com.example.hearmeout.ui.NowPlayingFragment"
+        android:label="fragment_now_playing"
+        tools:layout="@layout/fragment_now_playing" >
+        <argument
+            android:name="mediaId"
+            app:argType="string" />
+    </fragment>
 </navigation>
