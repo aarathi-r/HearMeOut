@@ -1,15 +1,21 @@
 package com.example.hearmeout.playback
 
+import android.media.MediaMetadata
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.IMediaControllerCallback
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import com.example.hearmeout.R
 import com.example.hearmeout.databinding.FragmentNowPlayingBinding
+import com.example.hearmeout.viewmodel.NowPlayingViewModel
 
-class MediaControllerCallbacks(private val binding : FragmentNowPlayingBinding) : MediaControllerCompat.Callback() {
+class MediaControllerCallbacks(
+    private val binding : FragmentNowPlayingBinding,
+    private val viewModel : NowPlayingViewModel) : MediaControllerCompat.Callback() {
 
     override fun onSessionReady() {
     }
@@ -30,7 +36,8 @@ class MediaControllerCallbacks(private val binding : FragmentNowPlayingBinding) 
 
     override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
         Log.i("Aarathi","Metadata is changed")
-        //binding.mediaData.text = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: "No Title"
+        viewModel.media.value = metadata?.description
+        viewModel.duration.value = metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)
     }
 
     override fun onAudioInfoChanged(info: MediaControllerCompat.PlaybackInfo?) {
@@ -39,6 +46,4 @@ class MediaControllerCallbacks(private val binding : FragmentNowPlayingBinding) 
     override fun onQueueChanged(queue: MutableList<MediaSessionCompat.QueueItem>?) {
         super.onQueueChanged(queue)
     }
-
-
 }

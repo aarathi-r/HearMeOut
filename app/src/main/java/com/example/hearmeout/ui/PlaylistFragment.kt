@@ -2,7 +2,6 @@ package com.example.hearmeout.ui
 
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -61,7 +60,6 @@ class PlaylistFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false)
         binding.lifecycleOwner = this
         binding.viewModel = playlistViewModel
@@ -78,6 +76,13 @@ class PlaylistFragment : Fragment() {
         }
     }
 
+    private fun onServiceConnected() {
+        mediaRoot?.let {
+            Log.i("Aarathi", "Subscribe for MediaItems")
+            mediaBrowser.subscribe(it, subscriptionCallback)
+        }
+    }
+
     override fun onStop() {
         super.onStop()
         mediaRoot?.let {
@@ -85,19 +90,10 @@ class PlaylistFragment : Fragment() {
         }
     }
 
-    private fun onServiceConnected() {
-        mediaRoot?.let {
-            Log.i("Aarathi", "Subscribe for MediaItems")
-            mediaBrowser.subscribe(it, subscriptionCallback)
-        }
-
-    }
-
     private fun play(mediaItem : MediaBrowserCompat.MediaItem) {
         Log.i("Aarathi", "Play button clicked")
-        mediaItem.mediaId?.let {
-            findNavController().navigate(PlaylistFragmentDirections.actionPlaylistFragmentToNowPlayingFragment(it))
-        }
+        findNavController().navigate(PlaylistFragmentDirections.actionPlaylistFragmentToNowPlayingFragment(mediaItem.description))
+
     }
 
     private fun browse(mediaItem : MediaBrowserCompat.MediaItem) {

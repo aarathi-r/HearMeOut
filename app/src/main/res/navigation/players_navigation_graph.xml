@@ -22,7 +22,7 @@
         android:label="fragment_now_playing"
         tools:layout="@layout/fragment_now_playing" >
         <argument
-            android:name="mediaId"
-            app:argType="string" />
+            android:name="mediaDescription"
+            app:argType="android.support.v4.media.MediaDescriptionCompat" />
     </fragment>
 </navigation>

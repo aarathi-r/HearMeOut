@@ -1,35 +1,39 @@
 package com.example.hearmeout.ui
 
-import android.support.v4.media.MediaDescriptionCompat
+import android.app.Activity
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 
-fun updateMediaMetadata(mediaController : MediaControllerCompat, media : MediaDescriptionCompat) {
+fun updateMediaMetadata(context : Activity, mediaId : String) {
+    val mediaController = MediaControllerCompat.getMediaController(context)
     mediaController.playbackState.state
         .takeIf { it == PlaybackStateCompat.STATE_NONE
                 || it == PlaybackStateCompat.STATE_PLAYING
         }?.run { mediaController.transportControls
-            .playFromMediaId(media.mediaUri.toString(), null)
+            .playFromMediaId(mediaId, null)
         }
 }
 
-fun handlePlayCurrent(mediaController : MediaControllerCompat, media : MediaDescriptionCompat) {
+fun handlePlayCurrent(context : Activity, mediaId : String) {
+    val mediaController = MediaControllerCompat.getMediaController(context)
     val playbackState = mediaController.playbackState.state
     Log.i("Aarathi", "Playback state - $playbackState")
 
     when (playbackState) {
         PlaybackStateCompat.STATE_PLAYING -> mediaController.transportControls.pause()
-        PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_NONE -> mediaController.transportControls.playFromMediaId(media.mediaUri.toString(), null)
+        PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_NONE -> mediaController.transportControls.playFromMediaId(mediaId, null)
         else -> Log.i("Aarathi", "Not handled - state: $playbackState")
     }
 }
 
-fun handlePlayPrevious(mediaController : MediaControllerCompat) {
+fun handlePlayPrevious(context : Activity) {
+    val mediaController = MediaControllerCompat.getMediaController(context)
     mediaController.transportControls.skipToPrevious()
 }
 
-fun handlePlayNext(mediaController : MediaControllerCompat) {
+fun handlePlayNext(context : Activity) {
+    val mediaController = MediaControllerCompat.getMediaController(context)
     mediaController.transportControls.skipToNext()
 }
 

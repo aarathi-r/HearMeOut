@@ -1,19 +1,22 @@
+
 package com.example.hearmeout.data
 
-import android.media.MediaMetadata
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.util.Log
-import com.example.hearmeout.util.BASE_URL
-import com.example.hearmeout.util.MUSIC_ENDPOINT
+import com.example.hearmeout.playback.*
+import com.example.hearmeout.util.*
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import retrofit2.*
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-object SongProvider {
+class SongProvider {
 
+    private lateinit var songs : List<Song>
     private var mediaList = mutableListOf<MediaMetadataCompat>()
     private var mediaIdToMetadataMap = HashMap<String, MediaMetadataCompat>()
 
@@ -32,47 +35,26 @@ object SongProvider {
         retrofit.create(NetworkInterface::class.java)
     }
 
-    suspend fun fetchSongs() : List<MediaMetadataCompat> {
+    suspend fun fetchSongs() : List<Song> {
         Log.i("Aarathi", "Fetch the Songs")
-
-        try {
-            withContext(Dispatchers.IO) {
-                val music = fetchSongsFromNetwork()
-                music.songs.forEach { song ->
-                    //val mediaId = song.source.hashCode().toString()
-                    val mediaId = song.source
-                    song.image = BASE_URL + MUSIC_ENDPOINT + song.image
-                    song.source = BASE_URL + MUSIC_ENDPOINT + song.source
-                    MediaMetadataCompat.Builder().run {
-                        putString(MediaMetadata.METADATA_KEY_MEDIA_ID, mediaId)
-                        putString(MediaMetadata.METADATA_KEY_TITLE, song.title)
-                        putString(MediaMetadata.METADATA_KEY_ALBUM, song.album)
-                        putString(MediaMetadata.METADATA_KEY_ARTIST, song.artist)
-                        putString(MediaMetadata.METADATA_KEY_GENRE, song.genre)
-                        putString(MediaMetadata.METADATA_KEY_MEDIA_URI, song.source)
-                        putString(MediaMetadata.METADATA_KEY_ART_URI, song.image)
-                        putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, song.trackNumber)
-                        putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, song.trackCount)
-                        putLong(MediaMetadata.METADATA_KEY_DURATION, song.duration)
-                        build()
-                    }.let { metadata ->
-                        mediaIdToMetadataMap[mediaId] = metadata
-                        mediaList.add(metadata)
-                    }
-                }
+        return withContext(Dispatchers.IO) {
+            val music = fetchSongsFromNetwork()
+            music.songs.forEach { song ->
+                song.image = BASE_URL + MUSIC_ENDPOINT + song.image
+                song.source = BASE_URL + MUSIC_ENDPOINT + song.source
+                val mediaId = song.source.hashCode().toString()
+                val metadata = convertToMetadata(song, mediaId)
+                mediaIdToMetadataMap[mediaId] = metadata
             }
-        } catch (t : Throwable) {
-
+            music.songs
         }
-        return mediaList
     }
 
     private suspend fun fetchSongsFromNetwork() : Music {
         return networkInterface.getAllSongs()
     }
 
-    fun getMetadataForMediaId(mediaId : String) : MediaMetadataCompat? {
-        val metadata = mediaIdToMetadataMap[mediaId]
-        return metadata
+    fun getMetadataForMediaId(mediaId: String): MediaMetadataCompat? {
+        return mediaIdToMetadataMap[mediaId]
     }
 }

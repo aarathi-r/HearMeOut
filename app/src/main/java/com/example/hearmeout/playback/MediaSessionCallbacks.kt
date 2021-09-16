@@ -4,45 +4,31 @@ import android.content.Context
 import android.content.Intent
 import android.media.*
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import com.example.hearmeout.R
 
-class MediaSessionCallbacks(private val service : MediaPlaybackService) : MediaSessionCompat.Callback() {
+class MediaSessionCallbacks(private val service : MediaPlaybackService, private val mediaSession : MediaSessionCompat) : MediaSessionCompat.Callback() {
 
-    private var mediaPlayer : MediaPlayer = initPlayer()
+    private var mediaPlayer : MediaPlayer = MediaPlayer()
     private val playbackActions = PlaybackActions(mediaPlayer)
 
     private var audioManager : AudioManager =
         service.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
     private lateinit var audioFocusRequest: AudioFocusRequest
-
-    private var mediaList = listOf<MediaBrowserCompat.MediaItem>()
+//    private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focus ->
+//        when(focus) {
+//            AudioManager.AUDIOFOCUS_GAIN -> Log.i("Aarathi","Audio in focus currently")
+//            AudioManager.AUDIOFOCUS_LOSS -> Log.i("Aarathi","Audio not in focus anymore")
+//            else -> Log.i("Aarathi","The audio focus state is : $focus" )
+//        }
+//    }
 
     private var curPos : Int = 0
 
-    //TODO - update the logic
-    fun initMediaList(media : List<MediaBrowserCompat.MediaItem>) {
-        mediaList = media
-    }
-
-    private fun initPlayer() : MediaPlayer {
-        return MediaPlayer()
-    }
-
     private fun startPlayer() {
         audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
-            setOnAudioFocusChangeListener { focus ->
-                when(focus) {
-                    AudioManager.AUDIOFOCUS_GAIN -> Log.i("Aarathi","Audio in focus currently")
-                    AudioManager.AUDIOFOCUS_LOSS -> Log.i("Aarathi","Audio not in focus anymore")
-                    else -> Log.i("Aarathi","The audio focus state is : $focus" )
-                }
-            }
+            //setOnAudioFocusChangeListener(audioFocusChangeListener)
             setAudioAttributes(AudioAttributes.Builder().run {
                 setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 build() })
@@ -52,10 +38,10 @@ class MediaSessionCallbacks(private val service : MediaPlaybackService) : MediaS
         val audioFocus = audioManager.requestAudioFocus(audioFocusRequest)
         if (audioFocus == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             service.startService(Intent(service.applicationContext, MediaPlaybackService::class.java))
-            service.getMediaSession()?.apply {
+            mediaSession.apply {
                 isActive = true
-                setPlaybackState(getPlaybackState(PlaybackStateCompat.STATE_PLAYING))
-                //setMetadata(getMetadata())
+                setPlaybackState(playbackActions.getPlaybackState(PlaybackStateCompat.STATE_PLAYING))
+                setMetadata(playbackActions.getMetadata())
             }
             mediaPlayer.start()
         }
@@ -74,7 +60,7 @@ class MediaSessionCallbacks(private val service : MediaPlaybackService) : MediaS
 
     override fun onPause() {
         Log.i("Aarathi","Pause button is pressed")
-        service.getMediaSession()?.setPlaybackState(getPlaybackState(PlaybackStateCompat.STATE_PAUSED))
+        mediaSession.setPlaybackState(playbackActions.getPlaybackState(PlaybackStateCompat.STATE_PAUSED))
         curPos = mediaPlayer.currentPosition
         mediaPlayer.pause()
     }
@@ -85,39 +71,20 @@ class MediaSessionCallbacks(private val service : MediaPlaybackService) : MediaS
             stop()
             release()
         }
-        service.getMediaSession()?.apply {
-            setPlaybackState(getPlaybackState(PlaybackStateCompat.STATE_STOPPED))
+        mediaSession.apply {
+            setPlaybackState(playbackActions.getPlaybackState(PlaybackStateCompat.STATE_STOPPED))
             isActive = false
         }
         service.stopSelf()
     }
 
-    private fun getPlaybackState(state : Int) : PlaybackStateCompat {
-        return PlaybackStateCompat.Builder().run {
-            setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0F)
-            build()
-        }
-    }
-
-    private fun getMetadata() : MediaMetadataCompat {
-        var title : String?
-        MediaMetadataRetriever().apply {
-            val afd = service.resources.openRawResourceFd(R.raw.rozana)
-            setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-            title = extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-        }
-
-        return MediaMetadataCompat.Builder().run {
-            putString(MediaMetadata.METADATA_KEY_TITLE, title ?: "Title unknown")
-            build()
-        }
-    }
-
     override fun onSkipToPrevious() {
-
+        playbackActions.skipToPrevious()
+        startPlayer()
     }
 
     override fun onSkipToNext() {
-
+        playbackActions.skipToNext()
+        startPlayer()
     }
 }

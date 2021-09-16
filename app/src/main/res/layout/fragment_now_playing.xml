@@ -61,42 +61,6 @@
             app:layout_constraintVertical_weight="0.15"
             tools:text="Song Artist" />
 
-        <ImageView
-            android:id="@+id/play_previous"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:contentDescription="@string/song_previous"
-            android:onClick="@{() -> viewModel.playPrevious()}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/play_current"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline"
-            app:srcCompat="@drawable/play_previous_icon" />
-
-        <ImageView
-            android:id="@+id/play_current"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:contentDescription="@string/song_play_state"
-            android:onClick="@{() -> viewModel.playCurrent()}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/play_next"
-            app:layout_constraintStart_toEndOf="@+id/play_previous"
-            app:layout_constraintTop_toTopOf="@+id/guideline"
-            app:srcCompat="@drawable/play_current_icon" />
-
-        <ImageView
-            android:id="@+id/play_next"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:contentDescription="@string/song_next"
-            android:onClick="@{() -> viewModel.playNext()}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/play_current"
-            app:layout_constraintTop_toTopOf="@+id/guideline"
-            app:srcCompat="@drawable/play_next_icon" />
-
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
             android:layout_width="wrap_content"
@@ -104,6 +68,55 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.75" />
 
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/song_progress"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="15dp"
+            app:maxTime="@{viewModel.duration}"
+            app:layout_constraintBottom_toTopOf="@+id/play_previous"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/guideline" />
+
+        <ImageView
+            android:id="@+id/play_previous"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="center"
+            android:contentDescription="@string/song_previous"
+            android:onClick="@{() -> viewModel.playPrevious()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/play_current"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/song_progress"
+            app:srcCompat="@drawable/play_previous_icon" />
+
+        <ImageView
+            android:id="@+id/play_current"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="center"
+            android:contentDescription="@string/song_play_state"
+            android:onClick="@{() -> viewModel.playCurrent()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/play_next"
+            app:layout_constraintStart_toEndOf="@+id/play_previous"
+            app:layout_constraintTop_toBottomOf="@+id/song_progress"
+            app:srcCompat="@drawable/play_icon" />
+
+        <ImageView
+            android:id="@+id/play_next"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="center"
+            android:contentDescription="@string/song_next"
+            android:onClick="@{() -> viewModel.playNext()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/play_current"
+            app:layout_constraintTop_toBottomOf="@+id/song_progress"
+            app:srcCompat="@drawable/play_next_icon" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

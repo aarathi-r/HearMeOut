@@ -15,9 +15,10 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/song_playlist_item_margin"
+        android:layout_marginHorizontal="@dimen/song_playlist_item_margin_hor"
+        android:layout_marginVertical="@dimen/song_playlist_item_margin_ver"
         app:strokeWidth="@dimen/song_playlist_item_strokeWidth"
-        app:strokeColor="@color/black"
+        app:cardElevation="8dp"
         app:shapeAppearance="@style/ShapeAppearance.HearMeOut.CardView"
         android:onClick="@{() -> clickListener.onClick(mediaItem)}">
 
@@ -30,6 +31,7 @@
                 android:id="@+id/art"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:scaleType="center"
                 android:contentDescription="@string/song_art"
                 app:imageUrl="@{mediaItem.description.iconUri}"
                 app:layout_constraintBottom_toBottomOf="parent"

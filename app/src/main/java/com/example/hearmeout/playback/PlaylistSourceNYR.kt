@@ -6,9 +6,26 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.net.toUri
+import com.example.hearmeout.data.Song
 import com.example.hearmeout.util.CATEGORY_ALBUM
 import com.example.hearmeout.util.CATEGORY_ARTIST
 import com.example.hearmeout.util.CATEGORY_GENRE
+
+fun covertToMetadata(song : Song, idPrefix : String = "") : MediaMetadataCompat {
+    return MediaMetadataCompat.Builder().run {
+        putString(MediaMetadata.METADATA_KEY_MEDIA_ID, idPrefix)
+        putString(MediaMetadata.METADATA_KEY_TITLE, song.title)
+        putString(MediaMetadata.METADATA_KEY_ALBUM, song.album)
+        putString(MediaMetadata.METADATA_KEY_ARTIST, song.artist)
+        putString(MediaMetadata.METADATA_KEY_GENRE, song.genre)
+        putString(MediaMetadata.METADATA_KEY_MEDIA_URI, song.source)
+        putString(MediaMetadata.METADATA_KEY_ART_URI, song.image)
+        putLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER, song.trackNumber)
+        putLong(MediaMetadata.METADATA_KEY_NUM_TRACKS, song.trackCount)
+        putLong(MediaMetadata.METADATA_KEY_DURATION, song.duration)
+        build()
+    }
+}
 
 fun getAllMediaItems(mediaList : List<MediaMetadataCompat>) : MutableList<MediaBrowserCompat.MediaItem> {
     val mediaItems = mutableListOf<MediaBrowserCompat.MediaItem>()
