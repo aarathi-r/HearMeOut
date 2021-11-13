@@ -4,7 +4,6 @@ import android.media.MediaMetadata
 import android.media.MediaPlayer
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 
 class PlaybackActions(private val player : MediaPlayer) {
 

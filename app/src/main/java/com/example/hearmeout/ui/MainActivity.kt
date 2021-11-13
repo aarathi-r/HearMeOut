@@ -64,4 +64,9 @@ class MainActivity : AppCompatActivity() {
     fun getMediaBrowser() : MediaBrowserCompat {
         return mediaBrowser
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MediaControllerCompat.getMediaController(this).transportControls.stop()
+    }
 }

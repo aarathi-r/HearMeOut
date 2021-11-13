@@ -1,10 +1,13 @@
 package com.example.hearmeout.ui
 
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.media2.session.MediaController
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,8 +27,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-private const val PLAYBACK_POSITION_REFRESH_INTERVAL_MS = 500L
-
 class NowPlayingFragment : Fragment() {
 
     private lateinit var binding : FragmentNowPlayingBinding
@@ -36,7 +37,6 @@ class NowPlayingFragment : Fragment() {
 
     private lateinit var controllerCallbacks : MediaControllerCallbacks
 
-    private var executor : ScheduledExecutorService? = null
 //    private val itemCallback = object : MediaBrowserCompat.ItemCallback() {
 //        override fun onItemLoaded(item: MediaBrowserCompat.MediaItem?) {
 //            item?.let {
@@ -66,8 +66,8 @@ class NowPlayingFragment : Fragment() {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_now_playing, container, false)
         binding.lifecycleOwner = this
         binding.viewModel = nowPlayingViewModel
-        controllerCallbacks = MediaControllerCallbacks(binding, nowPlayingViewModel)
-        initSeekBar(binding.songProgress)
+        controllerCallbacks = MediaControllerCallbacks(binding, nowPlayingViewModel,
+            MediaControllerCompat.getMediaController(this.requireActivity()))
         return binding.root
     }
 
@@ -84,18 +84,7 @@ class NowPlayingFragment : Fragment() {
             ?.unregisterCallback(controllerCallbacks)
     }
 
-    private fun initSeekBar(seekBar : AppCompatSeekBar) {
-//        executor = Executors.newSingleThreadScheduledExecutor()
-//        val mediaController = MediaControllerCompat.getMediaController(this.requireActivity()).mediaController as MediaController
-//        val runnable = Runnable {
-//            seekBar.progress = mediaController.currentPosition.toInt()
-//        }
-//        executor?.scheduleAtFixedRate(
-//            runnable,
-//            0,
-//            PLAYBACK_POSITION_REFRESH_INTERVAL_MS,
-//            TimeUnit.MILLISECONDS)
-    }
+
 
     private fun initObservers() {
 //        nowPlayingViewModel.media.observe(viewLifecycleOwner, {

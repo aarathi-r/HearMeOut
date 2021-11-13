@@ -88,6 +88,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.i("Aarathi","MediaPlaybackService - onDestroy")
         coroutineJob.cancel()
         mediaSession?.release()
     }
@@ -97,7 +98,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             try {
                 PlaylistProvider.fetchSongs()
             } catch (t : Throwable) {
-
             }
         }
     }

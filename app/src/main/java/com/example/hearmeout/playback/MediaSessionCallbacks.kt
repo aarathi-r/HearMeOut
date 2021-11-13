@@ -66,6 +66,8 @@ class MediaSessionCallbacks(private val service : MediaPlaybackService, private 
     }
 
     override fun onStop() {
+        Log.i("Aarathi","Stop the player and session")
+        service.stopSelf()
         audioManager.abandonAudioFocusRequest(audioFocusRequest)
         mediaPlayer.apply {
             stop()
@@ -75,7 +77,6 @@ class MediaSessionCallbacks(private val service : MediaPlaybackService, private 
             setPlaybackState(playbackActions.getPlaybackState(PlaybackStateCompat.STATE_STOPPED))
             isActive = false
         }
-        service.stopSelf()
     }
 
     override fun onSkipToPrevious() {
